@@ -1,0 +1,15 @@
+.classpath
+.project
+.settings
+build
+target
+out
+.vertx
+.idea/
+*.iml
+*.ipr
+*.iws
+*.class
+*.swp
+*.log
+src/main/generated/*
