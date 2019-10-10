@@ -1,3 +1,10 @@
+
+https://quarkus.io/guides/context-propagation-guide
+
+https://github.com/eclipse/microprofile-context-propagation
+
+https://github.com/OpenLiberty/open-liberty/issues/8660
+
 This projects prove, if the default Context implementation from gRPC can be used in an vertx environment.
 
 it will show, that the default Context handler cannot be used
