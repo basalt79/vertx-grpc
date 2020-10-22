@@ -18,19 +18,14 @@ public class EchoService extends EchoVertxImplBase {
   @Override
   public void echo(EchoRequest request, Future<EchoResponse> response) {
     timer(RANDOM.nextInt(100) + 1, request, response);
-//    noTimer(request, response);
-//    timer(5, request, response);
-
-  }
-
-  private void noTimer(EchoRequest request, Future<EchoResponse> response) {
-    response.complete(EchoResponse.newBuilder()
-      .setMsg(request.getMsg() + "-" + SessionIdInterceptor.SESSION_ID_CTX_KEY.get()).build());
   }
 
   private void timer(int ms, EchoRequest request, Future<EchoResponse> response) {
-    vertx.setTimer(ms, h -> response.complete(EchoResponse.newBuilder()
-      .setMsg(request.getMsg() + "-" + SessionIdInterceptor.SESSION_ID_CTX_KEY.get()).build()));
+    vertx.setTimer(ms, h -> {
+      var sessionId = SessionIdInterceptor.SESSION_ID_CTX_KEY.get();
+      response.complete(EchoResponse.newBuilder()
+        .setMsg(request.getMsg() + "-" + sessionId).build());
+    });
   }
 
 }

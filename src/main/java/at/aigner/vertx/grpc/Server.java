@@ -12,7 +12,7 @@ import java.util.Set;
 
 public class Server extends AbstractVerticle {
 
-    static Set<Integer> PORTS = new HashSet<>();
+    static final Set<Integer> PORTS = new HashSet<>();
     private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
     @Override

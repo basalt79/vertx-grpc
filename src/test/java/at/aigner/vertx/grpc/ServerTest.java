@@ -1,6 +1,5 @@
 package at.aigner.vertx.grpc;
 
-
 import io.grpc.Metadata;
 import io.grpc.stub.MetadataUtils;
 import io.vertx.core.DeploymentOptions;
@@ -27,7 +26,7 @@ public class ServerTest {
 
   private static final Logger logger = LoggerFactory.getLogger(ServerTest.class);
   private Vertx vertx;
-  private int instanceCount = 10;
+  private final int instanceCount = 10;
 
   @Before
   public void setUp(TestContext ctx) {
@@ -68,7 +67,7 @@ public class ServerTest {
     var request = EchoRequest.newBuilder().setMsg(msg).build();
     stub.echo(request, asyncResponse -> {
       if (asyncResponse.succeeded()) {
-//        logger.warn("Succeeded " + asyncResponse.result().getMsg());
+        logger.warn("Succeeded " + asyncResponse.result().getMsg());
         ctx.assertEquals(msg + "-" + sessionId, asyncResponse.result().getMsg());
         async.countDown();
       } else {
