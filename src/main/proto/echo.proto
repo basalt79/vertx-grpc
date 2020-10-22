@@ -12,8 +12,10 @@ service Echo {
 
 message EchoRequest {
     string msg = 1;
+    bool useTimer = 2;
 }
 
 message EchoResponse {
     string msg = 1;
+    bool useTimer = 2;
 }

@@ -12,24 +12,24 @@ import java.util.Set;
 
 public class Server extends AbstractVerticle {
 
-    static final Set<Integer> PORTS = new HashSet<>();
-    private static final Logger logger = LoggerFactory.getLogger(Server.class);
+  static final Set<Integer> PORTS = new HashSet<>();
+  private static final Logger logger = LoggerFactory.getLogger(Server.class);
 
-    @Override
-    public void start(Promise<Void> promise) throws Exception {
-        var host = "localhost";
-        var service = ServerInterceptors.intercept(new EchoService(vertx), new SessionIdInterceptor());
-        var server = VertxServerBuilder.forAddress(vertx, host, 0).addService(service).build();
-        server.start(r -> {
-            if (r.succeeded()) {
-                PORTS.add(server.getPort());
-                logger.info("Server started @ " + host + ":" + server.getPort());
-                promise.complete();
-            } else {
-                logger.error("Could not start server " + r.cause().getMessage(), r.cause());
-                promise.fail(r.cause());
-            }
-        });
-    }
+  @Override
+  public void start(Promise<Void> promise) throws Exception {
+    var host = "localhost";
+    var service = ServerInterceptors.intercept(new EchoService(vertx), new SessionIdInterceptor());
+    var server = VertxServerBuilder.forAddress(vertx, host, 0).addService(service).build();
+    server.start(r -> {
+      if (r.succeeded()) {
+        PORTS.add(server.getPort());
+        logger.info("Server started @ " + host + ":" + server.getPort());
+        promise.complete();
+      } else {
+        logger.error("Could not start server " + r.cause().getMessage(), r.cause());
+        promise.fail(r.cause());
+      }
+    });
+  }
 
 }

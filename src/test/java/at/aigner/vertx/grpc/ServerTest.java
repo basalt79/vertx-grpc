@@ -14,6 +14,7 @@ import io.vertx.ext.unit.junit.VertxUnitRunner;
 import io.vertx.grpc.VertxChannelBuilder;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -32,8 +33,8 @@ public class ServerTest {
   public void setUp(TestContext ctx) {
     System.setProperty(LOGGER_DELEGATE_FACTORY_CLASS_NAME, SLF4JLogDelegateFactory.class.getName());
     var vertxOptions = new VertxOptions().setEventLoopPoolSize(1);
-    var deploymentOptions = new DeploymentOptions().setInstances(instanceCount);
     vertx = Vertx.vertx(vertxOptions);
+    var deploymentOptions = new DeploymentOptions().setInstances(instanceCount);
     vertx.deployVerticle(Server.class.getName(), deploymentOptions, ctx.asyncAssertSuccess());
   }
 
@@ -43,13 +44,20 @@ public class ServerTest {
   }
 
   @Test
-  public void testMyApplication(TestContext ctx) {
+  public void echoWithTimer(TestContext ctx) {
     var async = ctx.async(instanceCount);
-    Server.PORTS.forEach(port -> call(ctx, async, port));
+    Server.PORTS.forEach(port -> call(ctx, async, port, true));
     async.await(5000);
   }
 
-  private void call(TestContext ctx, Async async, int port) {
+  @Test
+  public void echoWithoutTimer(TestContext ctx) {
+    var async = ctx.async(instanceCount);
+    Server.PORTS.forEach(port -> call(ctx, async, port, false));
+    async.await(5000);
+  }
+
+  private void call(TestContext ctx, Async async, int port, boolean useTimer) {
     var sessionId = UUID.randomUUID().toString();
     var extraHeaders = new Metadata();
     extraHeaders.put(Metadata.Key.of("sessionId", Metadata.ASCII_STRING_MARSHALLER), sessionId);
@@ -62,9 +70,9 @@ public class ServerTest {
       .disableRetry()
       .build();
 
-    var msg = "Foobar";
+    var msg = "foobar";
     var stub = EchoGrpc.newVertxStub(channel);
-    var request = EchoRequest.newBuilder().setMsg(msg).build();
+    var request = EchoRequest.newBuilder().setMsg(msg).setUseTimer(useTimer).build();
     stub.echo(request, asyncResponse -> {
       if (asyncResponse.succeeded()) {
         logger.warn("Succeeded " + asyncResponse.result().getMsg());
