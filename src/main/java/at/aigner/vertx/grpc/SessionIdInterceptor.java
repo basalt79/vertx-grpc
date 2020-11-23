@@ -1,25 +1,23 @@
 package at.aigner.vertx.grpc;
 
 import io.grpc.*;
-import io.vertx.core.logging.Logger;
-import io.vertx.core.logging.LoggerFactory;
+import io.vertx.grpc.ContextServerInterceptor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.ConcurrentMap;
 
 import static io.grpc.Metadata.ASCII_STRING_MARSHALLER;
 
-public class SessionIdInterceptor implements ServerInterceptor {
+public class SessionIdInterceptor extends ContextServerInterceptor {
+
   private static final Logger logger = LoggerFactory.getLogger(SessionIdInterceptor.class);
-  private static final Metadata.Key<String> SESSION_ID_METADATA_KEY = Metadata.Key.of("sessionId", ASCII_STRING_MARSHALLER);
-  static final Context.Key<String> SESSION_ID_CTX_KEY = Context.key("sessionId");
+  public static final String SESSION_ID = "sessionId";
 
   @Override
-  public <ReqT, RespT> ServerCall.Listener<ReqT> interceptCall(
-    ServerCall<ReqT, RespT> serverCall,
-    Metadata metadata,
-    ServerCallHandler<ReqT, RespT> serverCallHandler
-  ) {
-    var sessionId = metadata.get(SESSION_ID_METADATA_KEY);
-    logger.info("sessionId in interceptor: " + sessionId);
-    var ctx = Context.current().withValue(SESSION_ID_CTX_KEY, sessionId);
-    return Contexts.interceptCall(ctx, serverCall, metadata, serverCallHandler);
+  public void bind(Metadata metadata, ConcurrentMap<String, String> concurrentMap) {
+    logger.info("Extract session id from metadata");
+    concurrentMap.put(SESSION_ID, metadata.get(Metadata.Key.of(SESSION_ID, ASCII_STRING_MARSHALLER)));
   }
+
 }

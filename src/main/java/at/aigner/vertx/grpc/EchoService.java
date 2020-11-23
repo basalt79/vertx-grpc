@@ -1,12 +1,14 @@
 package at.aigner.vertx.grpc;
 
-import at.aigner.vertx.grpc.EchoGrpc.EchoVertxImplBase;
-import io.vertx.core.Promise;
+import io.grpc.stub.StreamObserver;
 import io.vertx.core.Vertx;
+import io.vertx.grpc.ContextServerInterceptor;
 
 import java.util.Random;
 
-public class EchoService extends EchoVertxImplBase {
+import static at.aigner.vertx.grpc.SessionIdInterceptor.SESSION_ID;
+
+public class EchoService extends EchoGrpc.EchoImplBase {
 
   private static final Random RANDOM = new Random();
   private final Vertx vertx;
@@ -16,29 +18,32 @@ public class EchoService extends EchoVertxImplBase {
   }
 
   @Override
-  public void echo(EchoRequest request, Promise<EchoResponse> response) {
+  public void echo(EchoRequest request, StreamObserver<EchoResponse> responseObserver) {
     if (request.getUseTimer()) {
-      timer(RANDOM.nextInt(100) + 1, request, response);
+      timer(RANDOM.nextInt(100) + 1, request, responseObserver);
     } else {
-      noTimer(request, response);
+      noTimer(request, responseObserver);
     }
   }
 
-  private void noTimer(EchoRequest request, Promise<EchoResponse> response) {
-    var echoResponse = EchoResponse.newBuilder()
-      .setMsg(request.getMsg() + "-" + SessionIdInterceptor.SESSION_ID_CTX_KEY.get())
-      .build();
-    response.complete(echoResponse);
+  private void noTimer(EchoRequest request, StreamObserver<EchoResponse> response) {
+    response.onNext(EchoResponse.newBuilder()
+      .setMsg(request.getMsg() + "-" + getSessionId())
+      .build());
+    response.onCompleted();
   }
 
-  private void timer(int ms, EchoRequest request, Promise<EchoResponse> response) {
+  private void timer(int ms, EchoRequest request, StreamObserver<EchoResponse> response) {
     vertx.setTimer(ms, h -> {
-      var sessionId = SessionIdInterceptor.SESSION_ID_CTX_KEY.get();
-      var echoResponse = EchoResponse.newBuilder()
-        .setMsg(request.getMsg() + "-" + sessionId)
-        .build();
-      response.complete(echoResponse);
+      response.onNext(EchoResponse.newBuilder()
+        .setMsg(request.getMsg() + "-" + getSessionId())
+        .build());
+      response.onCompleted();
     });
+  }
+
+  private String getSessionId() {
+    return ContextServerInterceptor.get(SESSION_ID);
   }
 
 }
