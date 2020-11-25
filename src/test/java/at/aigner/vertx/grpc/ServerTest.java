@@ -56,7 +56,7 @@ public class ServerTest {
   private void call(TestContext ctx, Async async, int port, boolean useTimer) {
     var sessionId = UUID.randomUUID().toString();
     var extraHeaders = new Metadata();
-    extraHeaders.put(Metadata.Key.of("sessionId", Metadata.ASCII_STRING_MARSHALLER), sessionId);
+    extraHeaders.put(Metadata.Key.of("SesSionId", Metadata.ASCII_STRING_MARSHALLER), sessionId);
     var clientInterceptor = MetadataUtils.newAttachHeadersInterceptor(extraHeaders);
 
     var channel = VertxChannelBuilder
@@ -68,7 +68,7 @@ public class ServerTest {
 
     var msg = "foobar";
     var stub = EchoGrpc.newStub(channel);
-    var request = EchoRequest.newBuilder().setMsg(msg).setUseTimer(useTimer).build();
+    var request = EchoRequest.newBuilder().setMessage(msg).setUseTimer(useTimer).build();
 
     stub.echo(request, new StreamObserver<>() {
       private EchoResponse response;
@@ -88,8 +88,8 @@ public class ServerTest {
       @Override
       public void onCompleted() {
         ctx.assertNotNull(request);
-        ctx.assertNotNull(request.getMsg());
-        System.out.println("Got the server response: " + response.getMsg());
+        ctx.assertNotNull(request.getMessage());
+        System.out.println("Got the server response: " + response.getMessage());
       }
     });
   }

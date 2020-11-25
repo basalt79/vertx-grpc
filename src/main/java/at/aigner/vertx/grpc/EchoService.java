@@ -6,8 +6,6 @@ import io.vertx.grpc.ContextServerInterceptor;
 
 import java.util.Random;
 
-import static at.aigner.vertx.grpc.SessionIdInterceptor.SESSION_ID;
-
 public class EchoService extends EchoGrpc.EchoImplBase {
 
   private static final Random RANDOM = new Random();
@@ -28,7 +26,7 @@ public class EchoService extends EchoGrpc.EchoImplBase {
 
   private void noTimer(EchoRequest request, StreamObserver<EchoResponse> response) {
     response.onNext(EchoResponse.newBuilder()
-      .setMsg(request.getMsg() + "-" + getSessionId())
+      .setMessage(request.getMessage() + "-" + getSessionId())
       .build());
     response.onCompleted();
   }
@@ -36,14 +34,14 @@ public class EchoService extends EchoGrpc.EchoImplBase {
   private void timer(int ms, EchoRequest request, StreamObserver<EchoResponse> response) {
     vertx.setTimer(ms, h -> {
       response.onNext(EchoResponse.newBuilder()
-        .setMsg(request.getMsg() + "-" + getSessionId())
+        .setMessage(request.getMessage() + "-" + getSessionId())
         .build());
       response.onCompleted();
     });
   }
 
   private String getSessionId() {
-    return ContextServerInterceptor.get(SESSION_ID);
+    return ContextServerInterceptor.get("sessionid");
   }
 
 }

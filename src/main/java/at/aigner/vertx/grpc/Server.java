@@ -18,7 +18,7 @@ public class Server extends AbstractVerticle {
   @Override
   public void start(Promise<Void> promise) {
     var host = "localhost";
-    var service = ServerInterceptors.intercept(new EchoService(vertx), new SessionIdInterceptor());
+    var service = ServerInterceptors.intercept(new EchoService(vertx), new HeaderInterceptor());
     var server = VertxServerBuilder.forAddress(vertx, host, 0).addService(service).build();
     server.start(r -> {
       if (r.succeeded()) {
